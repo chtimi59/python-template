@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# exit if error
+set -e
+# error if undef vars
+set -u 
+
+# use this script directory as a root point 
+cd `dirname "$(readlink -f "${BASH_SOURCE[0]}")"`
+
+# Usage
+usage() {
+    echo -e "Usage ./run <script_name>"   
+    echo -e
+    echo -e "Available scripts:"
+    echo -e "(ls $(pwd)/*.sh)"
+    ls -1 *.sh 2> /dev/null
+    echo -e
+    exit 1
+}
+
+if [ "$#" -eq 0 ]; then
+    usage    
+fi
+
+# check script
+script_name=$1;
+shift; # remove $1 in $@
+if [ ! -f "$script_name" ]; then
+    script_name="$script_name".sh
+fi
+if [ ! -f "$script_name" ]; then
+    echo -e "Error: '"$script_name"' is not a valid script"
+    usage
+fi
+
+# set environement, if not there
+[ ! -e venv ] && python3 -m venv venv
+
+# Activate our environement
+. venv/bin/activate
+
+# Run script
+source "$script_name" $@
